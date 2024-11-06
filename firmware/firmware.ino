@@ -3,11 +3,10 @@
 #include <MIDI.h>
 #include <Adafruit_VL53L0X.h>
 
+#define TOUCH_PIN 4
 
 Adafruit_USBD_MIDI usb_midi;
-
 MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, MIDI);
-
 Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 
 
@@ -51,8 +50,12 @@ void loop() {
     Serial.print("Distance in mm: ");
     Serial.println(lox.readRange());
     auto range = lox.readRange();
-    MIDI.sendControlChange(1, round(range/10), 1);
+    MIDI.sendControlChange(1, round(range / 10), 1);
   }
+
+  int touchValue = touchRead(TOUCH_PIN);
+  Serial.println(touchValue);
+  // MIDI.sendControlChange(1, round(range / 10), 1);
 }
 
 void handleNoteOn(byte channel, byte pitch, byte velocity) {}
