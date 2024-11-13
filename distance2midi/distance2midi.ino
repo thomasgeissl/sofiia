@@ -13,7 +13,7 @@ Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 void setup() {
   Serial.begin(115200);
   Serial.println("setting up midi device");
-  usb_midi.setStringDescriptor("sofiia midi");
+  usb_midi.setStringDescriptor("distance2midi");
   MIDI.setHandleNoteOn(handleNoteOn);
   MIDI.setHandleNoteOff(handleNoteOff);
   MIDI.begin(MIDI_CHANNEL_OMNI);
@@ -28,10 +28,8 @@ void setup() {
   Serial.println("setting up distance sensor");
   if (!lox.begin()) {
     Serial.println(F("Failed to boot VL53L0X"));
-    while (1)
-      ;
+    while (1){}
   }
-  lox.startRangeContinuous();
 }
 
 void loop() {
@@ -45,16 +43,25 @@ void loop() {
   // MIDI.sendNoteOff(note_sequence[previous], 0, 1);
 
   MIDI.read();
+  VL53L0X_RangingMeasurementData_t measure;
 
-  if (lox.isRangeComplete()) {
-    Serial.print("Distance in mm: ");
-    Serial.println(lox.readRange());
-    auto range = lox.readRange();
-    MIDI.sendControlChange(1, round(range / 10), 1);
+  // if (lox.isRangeComplete()) {
+  //   Serial.print("Distance in mm: ");
+  //   Serial.println(lox.readRange());
+  //   auto range = lox.readRange();
+  //   MIDI.sendControlChange(1, round(range / 10), 1);
+  // }
+  lox.rangingTest(&measure, false);  // pass in 'true' to get debug data printout!
+
+  if (measure.RangeStatus != 4) {  // phase failures have incorrect data
+    MIDI.sendControlChange(1, map(measure.RangeMilliMeter, 0, 1000, 0, 127), 1);
+    Serial.println(measure.RangeMilliMeter);
+  } else {
+    Serial.println(" out of range ");
   }
 
   int touchValue = touchRead(TOUCH_PIN);
-  Serial.println(touchValue);
+  // Serial.println(touchValue);
   // MIDI.sendControlChange(1, round(range / 10), 1);
 }
 

@@ -1,6 +1,8 @@
 # sofiia
 
-this repo contains a firmware for esp32 for sofiia's experiments.
+this repo contains firmware for esp32 used in sofiia's experiments.
+
+
 
 
 ## usage
